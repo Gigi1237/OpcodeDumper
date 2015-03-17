@@ -49,7 +49,8 @@ namespace OpcodeBruter
                 return;
             }
 
-            Logger.CreateOutputStream(Config.OutputFile);
+            if (Logger.CreateOutputStream(Config.OutputFile))
+                Logger.PrepOutputStram();
 
             Console.WriteLine(">> Opening Wow client...");
             ClientStream = new BinaryReader(File.OpenRead(Config.Executable));

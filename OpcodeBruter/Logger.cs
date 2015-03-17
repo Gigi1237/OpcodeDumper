@@ -21,6 +21,11 @@ namespace OpcodeBruter
             return outputFile != null;
         }
 
+        public static void PrepOutputStram()
+        {
+            outputFile.AutoFlush = true;
+        }
+
         public static void WriteConsoleLine(string str, params object[] obj)
         {
             Console.WriteLine(str, obj);
