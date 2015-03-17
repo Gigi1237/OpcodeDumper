@@ -37,8 +37,8 @@ namespace OpcodeBruter
 
             // Increment the name offset to look it up in the binary
             //! TODO This offset can change, always check it.
-            nameOffset += 0x401600 + 4; // And skip the name pointer again
-            var structureOffsetsCandidates = Program.ClientBytes.FindPattern(BitConverter.GetBytes(nameOffset - 4), 0xFF);
+            nameOffset += 0x401000 - 0x400; // And skip the name pointer again
+            var structureOffsetsCandidates = Program.ClientBytes.FindPattern(BitConverter.GetBytes(nameOffset), 0xFF);
             if (structureOffsetsCandidates.Count == 0)
                 Console.WriteLine("No JAMRecord structure found for group {0}", GetGroup());
             else

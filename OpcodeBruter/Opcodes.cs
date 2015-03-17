@@ -11,13 +11,13 @@ namespace OpcodeBruter
     {
         public static Regex OpcodeRgx = new Regex(@"Opcode\.(.+), 0x([A-Z0-9]+)(?: | 0x[0-9A-Z]+)?", RegexOptions.IgnoreCase);
 
-        private static string FilePath = @"https://raw.githubusercontent.com/TrinityCore/WowPacketParser/master/WowPacketParser/Enums/Version/V6_0_3_19103/Opcodes.cs";
+        private static string FilePath = @"https://raw.githubusercontent.com/TrinityCore/WowPacketParser/master/WowPacketParser/Enums/Version/V6_1_0_19678/Opcodes.cs";
         public static bool TryPopulate(bool smsg = true)
         {
             if ((smsg ? SMSG : CMSG).Count != 0)
                 return true;
 
-            Logger.WriteConsoleLine("Loading opcodes from GitHub, build 19103...");
+            Logger.WriteConsoleLine("Loading opcodes from GitHub, build 19702...");
             try
             {
                 WebClient client = new WebClient();
