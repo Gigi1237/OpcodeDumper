@@ -12,3 +12,8 @@ c) Make sure no section was added. If it was, you will need to adjust the increm
 d) Find the BeaEngine DLL you'll need. Update bindings if needed.
 
 e) Run the damn thing.
+
+  TODO
+=========
+- Implement SMSG diffing correctly
+- Fix Bad/Ugly code

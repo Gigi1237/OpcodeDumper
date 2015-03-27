@@ -3,39 +3,44 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Text;
 using Bea;
 
-namespace OpcodeBruter
+namespace OpcodeBruter.Dumpers
 {
     /// <summary>
     /// Description of CliOpcodes.
     /// </summary>
     public class SMSG
     {
+        private static List<SMSGInfo> smsgInfo = new List<SMSGInfo>();
+        public static int opcodeCount { private set; get; }
+
         public static void Dump()
         {
             var jamGroupCount = new Dictionary<JamGroup, uint>();
-            var opcodesCount = 0;
 
             Logger.WriteLine();
             Logger.WriteLine("Dumping SMSG opcodes...");
-            Logger.WriteLine("+---------------+-------------+-------------+--------------------+---------+");
-            Logger.WriteLine("|     Opcode    |  JAM Parser | Jam Handler |     Group Name     | ConnIdx |");
-            Logger.WriteLine("+---------------+-------------+-------------+--------------------+---------+");
+            Logger.WriteLine("+---------------+-------------+-------------+--------------------+---------+------------+");
+            Logger.WriteLine("|     Opcode    |  JAM Parser | Jam Handler |     Group Name     | ConnIdx | CONFIDENCE |");
+            Logger.WriteLine("+---------------+-------------+-------------+--------------------+---------+------------+");
 
             if (Config.SpecificOpcodeValue == 0xBADD)
             {
                 for (uint i = 0; i < 0x1FFF; ++i)
                     if (DumpOpcode(i, jamGroupCount))
-                        ++opcodesCount;
+                        ++opcodeCount;
             }
             else if (DumpOpcode(Config.SpecificOpcodeValue, jamGroupCount))
-                ++opcodesCount;
+                ++opcodeCount;
 
             Logger.WriteLine("+---------------+-------------+-------------+--------------------+---------+");
-            Logger.WriteLine(@"Dumped {0} SMSG JAM opcodes.", opcodesCount);
+            Logger.WriteLine(@"Dumped {0} SMSG JAM opcodes.", opcodeCount);
             for (var i = 0; i < jamGroupCount.Count; ++i)
                 Logger.WriteLine("Dumped {0} SMSG {1} opcodes.", jamGroupCount.Values.ElementAt(i), jamGroupCount.Keys.ElementAt(i).ToString());
+
+            smsgInfo = smsgInfo.OrderBy(x => x.Name).ToList();
         }
         
         private static bool DumpOpcode(uint opcode, Dictionary<JamGroup, uint> jamGroupCount)
@@ -116,16 +121,60 @@ namespace OpcodeBruter
                     jamGroupCount.Add(dispatcher.GetGroup(), 0);
                 jamGroupCount[dispatcher.GetGroup()] += 1;
 
-                Logger.WriteLine("| {4} (0x{0:X4}) |  0x{1:X8} |  0x{2:X8} | {3} | {6} | {5}",
+                Logger.WriteLine("| {1} (0x{0:X4}) |  0x{2:X8} |  0x{3:X8} | {4} | {5} |   {6:F4}   | {7}",
                                  opcode,
-                                 handler, parser,
-                                 dispatcher.GetGroup().ToString().PadLeft(18),
                                  opcode.ToString().PadLeft(4),
-                                 Opcodes.GetOpcodeNameForServer(opcode),
-                                 connIndex.ToString().PadLeft(7));
+                                 handler,
+                                 parser,
+                                 dispatcher.GetGroup().ToString().PadLeft(18),
+                                 connIndex.ToString().PadLeft(7),
+                                 Program.FuncDiff != null ? Program.FuncDiff.getCertianty(parser) : 0,
+                                 Opcodes.GetOpcodeNameForServer(opcode, parser));
+
+                smsgInfo.Add(new SMSGInfo(Opcodes.GetOpcodeNameForServer(opcode, parser), opcode, handler, parser, dispatcher.GetGroup().ToString(),
+                    (Program.FuncDiff != null ? Program.FuncDiff.getCertianty(parser) : 0.0f)));
                 return true;
             }
             return false;
+        }
+    }
+
+    public class SMSGInfo : OpcodeInfo
+    {
+        public UInt32 Handler { private set; get; }
+        public UInt32 Parser { private set; get; }
+        public string Dispatcher { private set; get; }
+
+        public SMSGInfo(string name, UInt32 opcode, UInt32 handler, UInt32 parser, string dispatcher, double certianty = 0.0f) : base(name, opcode, certianty)
+        {
+            Handler = handler;
+            Parser = parser;
+            Dispatcher = dispatcher;
+        }
+
+        public override void FormatName()
+        {
+            if (!Name.StartsWith("SMSG"))
+            {
+                StringBuilder nameBuilder = new StringBuilder("SMSG");
+                Name = Name.Remove(0, 6);
+                for (int i = 0; i < Name.Length; i++) // Removes 'Client' prefix from name
+                {
+                    if (Char.IsUpper(Name[i]))
+                    {
+                        nameBuilder.AppendFormat("_{0}", char.ToUpper(Name[i]));
+                    }
+                    else
+                        nameBuilder.Append(char.ToUpper(Name[i]));
+                }
+
+                Name = nameBuilder.ToString();
+            }
+        }
+
+        public override string getPrintString()
+        {
+            throw new NotImplementedException();
         }
     }
 }

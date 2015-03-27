@@ -20,6 +20,9 @@ namespace OpcodeBruter
         public static Stream BaseStream { get { return ClientStream.BaseStream; } }
         public static byte[] ClientBytes { get; private set; }
         public static UnmanagedBuffer Disasm { get; private set; }
+        public static BinDiff FuncDiff { get; private set; }
+        public static OpcodeTable OpTable { get; private set; }
+        public static Dumpers.Build ClientBuild { get; private set; }
 
         // Used to populate Dispatchers.
         // First byte is used to avoid multiple matches on Client - tons of false positives there.
@@ -49,6 +52,31 @@ namespace OpcodeBruter
                 return;
             }
 
+            if ((Config.BinDiff == string.Empty) != (Config.Opcode == string.Empty))
+            {
+                Console.WriteLine("ERROR: -d and -o flags need to be both present to function!");
+                return;
+            }
+
+            if (Config.BinDiff != string.Empty && Config.Opcode != string.Empty)
+            {
+                Console.WriteLine(">> Opening Diff...");
+                FuncDiff = new BinDiff(Config.BinDiff);
+                if (!FuncDiff.openConnection())
+                {
+                    Console.WriteLine(">> Failed to open diff!");
+                    return;
+                }
+
+                Console.WriteLine(">> Opening OpcodeTable...");
+                OpTable = new OpcodeTable(Config.Opcode);
+                if (!OpTable.openConnection())
+                {
+                    Console.WriteLine(">> Failed to open OpcodeTable!");
+                    return;
+                }
+            }
+
             if (Logger.CreateOutputStream(Config.OutputFile))
                 Logger.PrepOutputStram();
 
@@ -60,7 +88,6 @@ namespace OpcodeBruter
             ClientBytes = File.ReadAllBytes(Config.Executable);
             Disasm = new UnmanagedBuffer(ClientBytes);
             Environment = Emulator.Create(BaseStream);
-
 
             Console.WriteLine(">> Discovering JAM groups...");
             foreach (var pattern in ClientGroupPatterns) // Load jam groups...
@@ -79,14 +106,27 @@ namespace OpcodeBruter
                 }
             }
 
+            ClientBuild = new Dumpers.Build();
+
+            if (ClientBuild.isBuildSupported())
+                Logger.WriteLine("Detected build {0}.{1}", ClientBuild.Version, ClientBuild.BuildNumber);
+            else
+            {
+                Console.WriteLine("ERROR! Build unsupported!");
+                return;
+            }
+
             if (!Config.NoGhNames && !Opcodes.TryPopulate())
                 return;
 
             if (!Config.NoSmsg)
-                SMSG.Dump();
+                Dumpers.SMSG.Dump();
 
             if (!Config.NoCmsg)
-                CMSG.Dump(Config.SpecificOpcodeValue);
+                Dumpers.CMSG.Dump(Config.SpecificOpcodeValue);
+
+            if (Config.WPP)
+                Dumpers.CMSG.dumpWPPFile("Opcodes.cs");
         }
     }
 }

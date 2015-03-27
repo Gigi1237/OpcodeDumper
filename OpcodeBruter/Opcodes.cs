@@ -9,15 +9,16 @@ namespace OpcodeBruter
 {
     public static class Opcodes
     {
+
         public static Regex OpcodeRgx = new Regex(@"Opcode\.(.+), 0x([A-Z0-9]+)(?: | 0x[0-9A-Z]+)?", RegexOptions.IgnoreCase);
 
-        private static string FilePath = @"https://raw.githubusercontent.com/TrinityCore/WowPacketParser/master/WowPacketParser/Enums/Version/V6_1_0_19678/Opcodes.cs";
+        private static string FilePath = @"https://raw.githubusercontent.com/TrinityCore/WowPacketParser/master/WowPacketParser/Enums/Version/V6_1_2_19802/Opcodes.cs";
         public static bool TryPopulate(bool smsg = true)
         {
             if ((smsg ? SMSG : CMSG).Count != 0)
                 return true;
 
-            Logger.WriteConsoleLine("Loading opcodes from GitHub, build 19702...");
+            Logger.WriteConsoleLine("Loading opcodes from GitHub, build 19802...");
             try
             {
                 WebClient client = new WebClient();
@@ -48,14 +49,23 @@ namespace OpcodeBruter
             return (smsg ? SMSG : CMSG).Count != 0;
         }
 
-        public static string GetOpcodeNameForServer(uint opcode)
+        public static string GetOpcodeNameForServer(uint opcode, uint Handler)
         {
-            return SMSG.FirstOrDefault(p => p.Value == opcode).Key;
+            string output = SMSG.FirstOrDefault(p => p.Value == opcode).Key;
+            //if (Config.BinDiff != string.Empty && output == null)
+            //    output = Program.OpTable.getSMSGNameFromHandler(Program.FuncDiff.getOldFunction(Handler)); // SMSG diff is not working yet
+
+            return output;
         }
 
-        public static string GetOpcodeNameForClient(uint opcode)
+        public static string GetOpcodeNameForClient(uint opcode, uint Ctor)
         {
-            return CMSG.FirstOrDefault(p => p.Value == opcode).Key;
+            string output = CMSG.FirstOrDefault(p => p.Value == opcode).Key;
+            if (Config.BinDiff != string.Empty && output == null)
+                output = Program.OpTable.getCMSGNameFromCtor(Program.FuncDiff.getOldFunction(Ctor));
+
+            return output;
+
         }
 
         public static Dictionary<string, int> CMSG = new Dictionary<string, int>();

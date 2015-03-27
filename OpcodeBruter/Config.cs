@@ -31,6 +31,15 @@ namespace OpcodeBruter
         [ConfigKey("-of", "Path to the file used for output.")]
         public static string OutputFile = String.Empty;
 
+        [ConfigKey("-wpp", "Dump opcodes to WPP compatible array. (CMSG only)")]
+        public static bool WPP = false;
+
+        [ConfigKey("-d", "Path to bindiff results. Requires -o flag. (CMSG only)")]
+        public static string BinDiff = String.Empty;
+
+        [ConfigKey("-o", "Path to 6.0.3 sqlite opcode file. Requires -d flag. (CMSG only)")]
+        public static string Opcode = String.Empty;
+
         public static bool Load(string[] args)
         {
             var showHelp = !TryGet<uint>(args, "-op", ref SpecificOpcodeValue, 0xBADD);
@@ -38,7 +47,10 @@ namespace OpcodeBruter
             showHelp = !TryGet<bool>(args, "-no-client", ref NoCmsg, false);
             showHelp = !TryGet<bool>(args, "-no-server", ref NoSmsg, false);
             showHelp = !TryGet<bool>(args, "-no-gh-names", ref NoGhNames, false);
+            showHelp = !TryGet<bool>(args, "-wpp", ref WPP, false);
             showHelp = !TryGet<string>(args, "-of", ref OutputFile, String.Empty);
+            showHelp = !TryGet<string>(args, "-d", ref BinDiff, String.Empty);
+            showHelp = !TryGet<string>(args, "-o", ref Opcode, String.Empty);
             showHelp = !TryGet<string>(args, "-e", ref Executable, AppDomain.CurrentDomain.BaseDirectory + "./Wow.exe");
             return showHelp ? ShowHelp() : true;
         }
