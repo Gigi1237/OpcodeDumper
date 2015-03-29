@@ -121,6 +121,7 @@ namespace OpcodeBruter.Dumpers
                 }
             }
 
+            cmsgInfo = cmsgInfo.OrderBy(x => x.Name).ToList();
             foreach (CMSGInfo cmsg in cmsgInfo)
             {
                 if (cmsg.Opcode != 0x0105) //OTHER UGLY HACK
@@ -129,7 +130,6 @@ namespace OpcodeBruter.Dumpers
                     Logger.WriteLine(cmsg.getPrintString());
                 }
             }
-            cmsgInfo = cmsgInfo.OrderBy(x => x.Name).ToList();
 
 
             Logger.WriteLine("+---------------+------------+------------+------------+");
