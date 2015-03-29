@@ -50,10 +50,26 @@ namespace OpcodeBruter.Dumpers
 
                 var callOffset = BitConverter.ToInt32(bytes, 15);
 
-                // Check isn't needed - use it if IDA shows some false positives.
-                //var subCall = (uint)(currPatternOffset + callIndex) + callOffset + 5;
-                //if (subCall != 0x004111B6) // CDataStore::PutInt32
-                //    continue;
+                // False positive check
+                int PutUInt32 = 0;
+                switch (Program.ClientBuild.BuildNumber)
+                {
+                    case 19324:
+                        PutUInt32 = 0x0040FD64;
+                        break;
+                    case 19702:
+                        PutUInt32 = 0x004110E6;
+                        break;
+                    case 19802:
+                        PutUInt32 = 0x004111B6;
+                        break;
+                    default:
+                        PutUInt32 = 0x0;
+                        break;
+                }
+                var subCall = (uint)(currPatternOffset + callIndex) + callOffset + 5;
+                if (subCall != PutUInt32 && PutUInt32 != 0) // CDataStore::PutInt32
+                    continue;
 
                 var opcodeValue = specificOpcode == 0xBADD ? BitConverter.ToUInt16(bytes, 10) : specificOpcode;
                 var ptBytes = BitConverter.GetBytes(currPatternOffset + 0x400C00);
@@ -163,7 +179,10 @@ namespace OpcodeBruter.Dumpers
 
         public override void FormatName()
         {
-            if (!Name.StartsWith("CMSG") && Name != string.Empty && Name != null)
+            if (Name == null)
+                Name = string.Empty;
+
+            if (!Name.StartsWith("CMSG") && Name != string.Empty)
             {
                 string[] prefixes = {
                 "PlayerCli",

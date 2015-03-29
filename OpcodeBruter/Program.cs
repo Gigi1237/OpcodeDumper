@@ -41,7 +41,7 @@ namespace OpcodeBruter
 
         static void Main(string[] args)
         {
-            try
+//            try
             {
                 Console.WriteLine(">> Loading configuration options...");
                 if (!Config.Load(args))
@@ -110,11 +110,10 @@ namespace OpcodeBruter
 
                 ClientBuild = new Dumpers.Build();
 
-                if (ClientBuild.isBuildSupported())
-                    Logger.WriteLine("Detected build {0}.{1}", ClientBuild.Version, ClientBuild.BuildNumber);
-                else
+                Logger.WriteLine("Detected build {0}.{1}", ClientBuild.Version, ClientBuild.BuildNumber);
+                if (!ClientBuild.isBuildSupported())
                 {
-                    Console.WriteLine("ERROR! Build unsupported!");
+                    Console.WriteLine("Build unsupported!\nThere might be unexpected results running opcodedumper.");
                     return;
                 }
 
@@ -130,11 +129,11 @@ namespace OpcodeBruter
                 if (Config.WPP)
                     Dumpers.CMSG.dumpWPPFile("Opcodes.cs");
             }
-            catch(SystemException e)
-            {
-                Console.WriteLine("Caught level exception: \n{0}\n\n Did you use the correct command line arguments?use -help to show usage.\nPress any key to exit...", e.Message);
-                Console.ReadKey();
-            }
+            //catch(SystemException e)
+            //{
+            //    Console.WriteLine("Caught level exception: \n{0}\n\n Did you use the correct command line arguments?use -help to show usage.\nPress any key to exit...", e.Message);
+            //    Console.ReadKey();
+            //}
         }
     }
 }
