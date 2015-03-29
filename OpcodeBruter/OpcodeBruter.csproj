@@ -109,9 +109,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Data\Opcodes_Wow19324.sqlite" />
-    <None Include="Data\Wow19702_vs_Wow19324.BinDiff" />
-    <None Include="Data\Wow19802_vs_Wow19324.BinDiff" />
+    <None Include="Data\Opcodes_Wow19324.sqlite">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Wow19802_vs_Wow19324.BinDiff">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

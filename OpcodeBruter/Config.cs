@@ -40,6 +40,9 @@ namespace OpcodeBruter
         [ConfigKey("-o", "Path to 6.0.3 sqlite opcode file. Requires -d flag. (CMSG only)")]
         public static string Opcode = String.Empty;
 
+        [ConfigKey("-help", "Shows this help.")]
+        public static bool help = false;
+
         public static bool Load(string[] args)
         {
             var showHelp = !TryGet<uint>(args, "-op", ref SpecificOpcodeValue, 0xBADD);
@@ -52,7 +55,9 @@ namespace OpcodeBruter
             showHelp = !TryGet<string>(args, "-d", ref BinDiff, String.Empty);
             showHelp = !TryGet<string>(args, "-o", ref Opcode, String.Empty);
             showHelp = !TryGet<string>(args, "-e", ref Executable, AppDomain.CurrentDomain.BaseDirectory + "./Wow.exe");
-            return showHelp ? ShowHelp() : true;
+            TryGet<bool>(args, "-help", ref help, false);
+
+            return showHelp || help ? ShowHelp() : true;
         }
 
         public static bool ShowHelp()

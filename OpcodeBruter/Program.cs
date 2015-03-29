@@ -41,92 +41,100 @@ namespace OpcodeBruter
 
         static void Main(string[] args)
         {
-            Console.WriteLine(">> Loading configuration options...");
-            if (!Config.Load(args))
-                return;
-
-            if (Config.NoCmsg && Config.NoSmsg)
+            try
             {
-                Logger.WriteConsoleLine("Please give me something to do.");
-                Config.ShowHelp();
-                return;
-            }
+                Console.WriteLine(">> Loading configuration options...");
+                if (!Config.Load(args))
+                    return;
 
-            if ((Config.BinDiff == string.Empty) != (Config.Opcode == string.Empty))
-            {
-                Console.WriteLine("ERROR: -d and -o flags need to be both present to function!");
-                return;
-            }
-
-            if (Config.BinDiff != string.Empty && Config.Opcode != string.Empty)
-            {
-                Console.WriteLine(">> Opening Diff...");
-                FuncDiff = new BinDiff(Config.BinDiff);
-                if (!FuncDiff.openConnection())
+                if (Config.NoCmsg && Config.NoSmsg)
                 {
-                    Console.WriteLine(">> Failed to open diff!");
+                    Logger.WriteConsoleLine("Please give me something to do.");
+                    Config.ShowHelp();
                     return;
                 }
 
-                Console.WriteLine(">> Opening OpcodeTable...");
-                OpTable = new OpcodeTable(Config.Opcode);
-                if (!OpTable.openConnection())
+                if ((Config.BinDiff == string.Empty) != (Config.Opcode == string.Empty))
                 {
-                    Console.WriteLine(">> Failed to open OpcodeTable!");
+                    Console.WriteLine("ERROR: -d and -o flags need to be both present to function!");
                     return;
                 }
-            }
 
-            if (Logger.CreateOutputStream(Config.OutputFile))
-                Logger.PrepOutputStram();
-
-            Console.WriteLine(">> Opening Wow client...");
-            ClientStream = new BinaryReader(File.OpenRead(Config.Executable));
-            if (!BaseStream.CanRead)
-                return;
-
-            ClientBytes = File.ReadAllBytes(Config.Executable);
-            Disasm = new UnmanagedBuffer(ClientBytes);
-            Environment = Emulator.Create(BaseStream);
-
-            Console.WriteLine(">> Discovering JAM groups...");
-            foreach (var pattern in ClientGroupPatterns) // Load jam groups...
-            {
-                var offsets = ClientBytes.FindPattern(pattern, 0xFF);
-                if (offsets.Count == 0)
+                if (Config.BinDiff != string.Empty && Config.Opcode != string.Empty)
                 {
-                    Console.WriteLine(@"Could not find group name "" {0}""", System.Text.Encoding.ASCII.GetString(pattern.Skip(1).ToArray()));
-                    return;
+                    Console.WriteLine(">> Opening Diff...");
+                    FuncDiff = new BinDiff(Config.BinDiff);
+                    if (!FuncDiff.openConnection())
+                    {
+                        Console.WriteLine(">> Failed to open diff!");
+                        return;
+                    }
+
+                    Console.WriteLine(">> Opening OpcodeTable...");
+                    OpTable = new OpcodeTable(Config.Opcode);
+                    if (!OpTable.openConnection())
+                    {
+                        Console.WriteLine(">> Failed to open OpcodeTable!");
+                        return;
+                    }
                 }
+
+                if (Logger.CreateOutputStream(Config.OutputFile))
+                    Logger.PrepOutputStram();
+
+                Console.WriteLine(">> Opening Wow client...");
+                ClientStream = new BinaryReader(File.OpenRead(Config.Executable));
+                if (!BaseStream.CanRead)
+                    return;
+
+                ClientBytes = File.ReadAllBytes(Config.Executable);
+                Disasm = new UnmanagedBuffer(ClientBytes);
+                Environment = Emulator.Create(BaseStream);
+
+                Console.WriteLine(">> Discovering JAM groups...");
+                foreach (var pattern in ClientGroupPatterns) // Load jam groups...
+                {
+                    var offsets = ClientBytes.FindPattern(pattern, 0xFF);
+                    if (offsets.Count == 0)
+                    {
+                        Console.WriteLine(@"Could not find group name "" {0}""", System.Text.Encoding.ASCII.GetString(pattern.Skip(1).ToArray()));
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine(@"Found JAM Group "" {0}""", System.Text.Encoding.ASCII.GetString(pattern.Skip(1).ToArray()));
+                        var dispatch = new JamDispatch((int)(offsets[0] + 1));
+                        Dispatchers[dispatch.GetGroup()] = dispatch;
+                    }
+                }
+
+                ClientBuild = new Dumpers.Build();
+
+                if (ClientBuild.isBuildSupported())
+                    Logger.WriteLine("Detected build {0}.{1}", ClientBuild.Version, ClientBuild.BuildNumber);
                 else
                 {
-                    Console.WriteLine(@"Found JAM Group "" {0}""", System.Text.Encoding.ASCII.GetString(pattern.Skip(1).ToArray()));
-                    var dispatch = new JamDispatch((int)(offsets[0] + 1));
-                    Dispatchers[dispatch.GetGroup()] = dispatch;
+                    Console.WriteLine("ERROR! Build unsupported!");
+                    return;
                 }
+
+                if (!Config.NoGhNames && !Opcodes.TryPopulate())
+                    return;
+
+                if (!Config.NoSmsg)
+                    Dumpers.SMSG.Dump();
+
+                if (!Config.NoCmsg)
+                    Dumpers.CMSG.Dump(Config.SpecificOpcodeValue);
+
+                if (Config.WPP)
+                    Dumpers.CMSG.dumpWPPFile("Opcodes.cs");
             }
-
-            ClientBuild = new Dumpers.Build();
-
-            if (ClientBuild.isBuildSupported())
-                Logger.WriteLine("Detected build {0}.{1}", ClientBuild.Version, ClientBuild.BuildNumber);
-            else
+            catch(SystemException e)
             {
-                Console.WriteLine("ERROR! Build unsupported!");
-                return;
+                Console.WriteLine("Caught level exception: \n{0}\n\n Did you use the correct command line arguments?use -help to show usage.\nPress any key to exit...", e.Message);
+                Console.ReadKey();
             }
-
-            if (!Config.NoGhNames && !Opcodes.TryPopulate())
-                return;
-
-            if (!Config.NoSmsg)
-                Dumpers.SMSG.Dump();
-
-            if (!Config.NoCmsg)
-                Dumpers.CMSG.Dump(Config.SpecificOpcodeValue);
-
-            if (Config.WPP)
-                Dumpers.CMSG.dumpWPPFile("Opcodes.cs");
         }
     }
 }

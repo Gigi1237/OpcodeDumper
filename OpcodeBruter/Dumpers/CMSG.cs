@@ -107,13 +107,16 @@ namespace OpcodeBruter.Dumpers
 
             foreach (CMSGInfo cmsg in cmsgInfo)
             {
-                cmsg.FormatName();
-                Logger.WriteLine(cmsg.getPrintString());
+                if (cmsg.Opcode != 0x0105) //OTHER UGLY HACK
+                {
+                    cmsg.FormatName();
+                    Logger.WriteLine(cmsg.getPrintString());
+                }
             }
             cmsgInfo = cmsgInfo.OrderBy(x => x.Name).ToList();
 
 
-            Logger.WriteLine("+---------------+------------+");
+            Logger.WriteLine("+---------------+------------+------------+------------+");
             Logger.WriteLine("Dumped {0} CMSG JAM opcodes.", opcodeCount);
         }
 
@@ -160,7 +163,7 @@ namespace OpcodeBruter.Dumpers
 
         public override void FormatName()
         {
-            if (!Name.StartsWith("CMSG") && Name != string.Empty)
+            if (!Name.StartsWith("CMSG") && Name != string.Empty && Name != null)
             {
                 string[] prefixes = {
                 "PlayerCli",

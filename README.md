@@ -1,3 +1,17 @@
+How to use OpcodeDumper
+=======================
+
+a) Compile OpcodeDumper
+
+b) Download the 32bit BeaEngine.dll from [here.](http://www.beaengine.org/downloads)
+
+c) Place BeaEngine.dll in the same directory as OpcodeBruter.exe
+
+c) Run OpcodeDumper.exe from the command line with the `-e` argument pointing to a copy of a windows 32bit World of Warcraft binary.
+If you want output to be dumped to a file use `-of` argument with desired filename.
+
+Run with no arguments or with `-help` to show help.
+
 Steps to update
 ==============
 

@@ -35,7 +35,7 @@ namespace OpcodeBruter.Dumpers
             else if (DumpOpcode(Config.SpecificOpcodeValue, jamGroupCount))
                 ++opcodeCount;
 
-            Logger.WriteLine("+---------------+-------------+-------------+--------------------+---------+");
+            Logger.WriteLine("+---------------+-------------+-------------+--------------------+---------+------------+");
             Logger.WriteLine(@"Dumped {0} SMSG JAM opcodes.", opcodeCount);
             for (var i = 0; i < jamGroupCount.Count; ++i)
                 Logger.WriteLine("Dumped {0} SMSG {1} opcodes.", jamGroupCount.Values.ElementAt(i), jamGroupCount.Keys.ElementAt(i).ToString());
