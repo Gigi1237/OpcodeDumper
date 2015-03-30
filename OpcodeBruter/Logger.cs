@@ -35,7 +35,10 @@ namespace OpcodeBruter
         {
             Console.WriteLine(str, obj);
             if (outputFile != null)
+            {
                 outputFile.WriteLine(str, obj);
+                outputFile.Flush();
+            }
         }
     }
 }

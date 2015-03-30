@@ -73,7 +73,6 @@
     <Compile Include="JamDispatch.cs" />
     <Compile Include="JamGroups.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="Opcodes\JamNamesIdentifier.cs" />
     <Compile Include="Opcodes\Opcodes.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
