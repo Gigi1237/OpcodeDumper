@@ -63,6 +63,9 @@ namespace OpcodeBruter.Dumpers
                     case 19802:
                         PutUInt32 = 0x004111B6;
                         break;
+                    case 19865:
+                        PutUInt32 = 0x004111B6;
+                        break;
                     default:
                         PutUInt32 = 0x0;
                         break;
