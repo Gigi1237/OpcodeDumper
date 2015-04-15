@@ -41,7 +41,7 @@ namespace OpcodeBruter
 
         static void Main(string[] args)
         {
-            try
+            //try
             {
                 Console.WriteLine(">> Loading configuration options...");
                 if (!Config.Load(args))
@@ -129,11 +129,11 @@ namespace OpcodeBruter
                 if (Config.WPP)
                     Dumpers.CMSG.dumpWPPFile("Opcodes.cs");
             }
-            catch(SystemException e)
-            {
-                Console.WriteLine("Caught level exception: \n{0}\n\nDid you use the correct command line arguments? Use -help to show usage.\nPress any key to exit...", e.Message);
-                Console.ReadKey();
-            }
+            //catch(SystemException e)
+            //{
+            //    Console.WriteLine("Caught level exception: \n{0}\n\nDid you use the correct command line arguments? Use -help to show usage.\nPress any key to exit...", e.Message);
+            //    Console.ReadKey();
+            //}
         }
     }
 }
