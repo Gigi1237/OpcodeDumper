@@ -26,7 +26,8 @@ namespace OpcodeBruter.Dumpers
         {
             { 19342, true },
             { 19702, true },
-            { 19802, true }
+            { 19802, true },
+            { 19865, true }
         };
         public string Version { private set; get; }
         public int BuildNumber { private set; get; }
@@ -41,10 +42,10 @@ namespace OpcodeBruter.Dumpers
             var VersionOffset = BitConverter.ToInt32(bytes, 11);
             var BuildOffset = BitConverter.ToInt32(bytes, 22);
 
-            Program.BaseStream.Seek(VersionOffset - 0x400C00, SeekOrigin.Begin);
+            Program.BaseStream.Seek(VersionOffset - 0x400E00, SeekOrigin.Begin);
             Version = new String(Program.ClientStream.ReadChars(5));
 
-            Program.BaseStream.Seek(BuildOffset - 0x400C00, SeekOrigin.Begin);
+            Program.BaseStream.Seek(BuildOffset - 0x400E00, SeekOrigin.Begin);
             BuildNumber = Int32.Parse(new String(Program.ClientStream.ReadChars(5)));
         }
 
