@@ -41,7 +41,7 @@ namespace OpcodeBruter
 
         static void Main(string[] args)
         {
-            //try
+            try
             {
                 Console.WriteLine(">> Loading configuration options...");
                 if (!Config.Load(args))
@@ -91,6 +91,21 @@ namespace OpcodeBruter
                 Disasm = new UnmanagedBuffer(ClientBytes);
                 Environment = Emulator.Create(BaseStream);
 
+                ClientBuild = new Dumpers.Build();
+                Logger.WriteLine("Detected build {0}.{1}", ClientBuild.Version, ClientBuild.BuildNumber);
+                switch (ClientBuild.isBuildSupported())
+                {
+                    case Dumpers.BuildSupport.BUILD_UNKOWN:
+                        Console.WriteLine("\nBuild not yet implemented!\nThere might be unexpected results running opcodedumper.");
+                        break;
+                    case Dumpers.BuildSupport.BUILD_UNSUPPORTED:
+                        Console.WriteLine("\nBuild unsupported!\nNameOffset has changed since this build. You can try using an old version.");
+                        return;
+                    case Dumpers.BuildSupport.BUILD_SUPPORTED:
+                        Console.WriteLine("Build Supported!");
+                        break;
+                }
+
                 Console.WriteLine(">> Discovering JAM groups...");
                 foreach (var pattern in ClientGroupPatterns) // Load jam groups...
                 {
@@ -108,15 +123,6 @@ namespace OpcodeBruter
                     }
                 }
 
-                ClientBuild = new Dumpers.Build();
-
-                Logger.WriteLine("Detected build {0}.{1}", ClientBuild.Version, ClientBuild.BuildNumber);
-                if (!ClientBuild.isBuildSupported())
-                {
-                    Console.WriteLine("Build unsupported!\nThere might be unexpected results running opcodedumper.");
-                    return;
-                }
-
                 if (!Config.NoGhNames && !Opcodes.TryPopulate())
                     return;
 
@@ -129,11 +135,11 @@ namespace OpcodeBruter
                 if (Config.WPP)
                     Dumpers.CMSG.dumpWPPFile("Opcodes.cs");
             }
-            //catch(SystemException e)
-            //{
-            //    Console.WriteLine("Caught level exception: \n{0}\n\nDid you use the correct command line arguments? Use -help to show usage.\nPress any key to exit...", e.Message);
-            //    Console.ReadKey();
-            //}
+            catch (SystemException e)
+            {
+                Console.WriteLine("Caught level exception: \n{0}\n\nDid you use the correct command line arguments? Use -help to show usage.\nPress any key to exit...", e.Message);
+                Console.ReadKey();
+            }
         }
     }
 }
